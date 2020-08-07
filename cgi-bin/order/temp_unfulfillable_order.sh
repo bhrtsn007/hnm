@@ -1,18 +1,11 @@
 #!/bin/bash
-all_unprocessable_order () {
-    echo "All Orders which is in unprocessable " 
+temp_unfulfillable_order () {
+    echo "Temporary Unfulfillable report for order id"
     echo "<br>"
-    if [ "$1" -eq "1" ]; then
-      echo '<pre>'
-       sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript order_node search_by "[[{'status', 'equal','unprocessable'}], 'key']."
-       echo '</pre>'
-    elif [ "$1" -eq "2" ]; then
-      echo '<pre>'
-       sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript order_node search_by "[[{'status', 'equal', 'unprocessable'}], 'record']."
-       echo '</pre>'
-    else 
-        echo "Wrong Key pressed"
-    fi
+    echo '<pre>'
+    sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript station_recovery get_temporary_unfulfillable_orders "[<<\"$1\">>]."
+    echo '</pre>'
+
 }
 echo "Content-type: text/html"
 echo ""
@@ -20,7 +13,7 @@ echo ""
 echo '<html>'
 echo '<head>'
 echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">'
-echo '<title>All Unprocessable Order</title>'
+echo '<title>Temp unfulfillable order details</title>'
 echo '</head>'
 echo '<body style="background-color:#B8B8B8">'
 
@@ -34,7 +27,7 @@ echo "<br>"
 
   echo "<form method=GET action=\"${SCRIPT}\">"\
        '<table nowrap>'\
-          '<tr><td>Type 1 for key and 2 for record</TD><TD><input type="number" name="Type 1 for key and 2 for record" size=12></td></tr>'\
+          '<tr><td>ORDER_ID</TD><TD><input type="number" name="ORDER_ID" size=12></td></tr>'\
 		  '</tr></table>'
 
   echo '<br><input type="submit" value="SUBMIT">'\
@@ -56,13 +49,12 @@ echo "<br>"
         exit 0
   else
    # No looping this time, just extract the data you are looking for with sed:
-     XX=`echo "$QUERY_STRING" | sed -n 's/^.*record=\([^ ]*\).*$/\1/p'`
+     XX=`echo "$QUERY_STRING" | sed -r 's/([^0-9]*([0-9]*)){1}.*/\2/'`
 	
-     echo "Type 1 for key and 2 for record: " $XX
+     echo "ORDER_ID: " $XX
      echo '<br>'
-     all_unprocessable_order $XX 
+     temp_unfulfillable_order $XX 
   fi
 echo '</body>'
 echo '</html>'
 
-exit 0

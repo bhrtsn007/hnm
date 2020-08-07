@@ -9,9 +9,9 @@ md_updater () {
     else
         ping -c1 -W 1 $bot_ip   >/dev/null
         if [ $? -eq 0 ];then
-           sshpass -p 'apj0702' ssh -o StrictHostKeyChecking=no -t gor@$bot_ip "cd /data/fw/md_updater && sudo python3 md_profiler.py -b 2.1 -m wmd -c script --log=DEBUG && sleep 15 && sudo python3 md_profiler.py -b 2.1 -m wmd -c profile --log=DEBUG && sleep 15 && sudo python3 md_profiler.py -b 2.1 -m lmd -c profile --log=DEBUG && sleep 15 && sudo rm -rf _pycache_"
+	   sshpass -p 'apj0702' ssh -o StrictHostKeyChecking=no -t gor@$bot_ip "cd /data/fw/md_updater && echo 'apj0702'| sudo -S /bin/sh script.sh "
            echo "<br>"
-           echo "OK Done...."
+           echo "OK Done..."
         else
            echo "Butler is not ON.....turn on Butler FIRST"
         fi

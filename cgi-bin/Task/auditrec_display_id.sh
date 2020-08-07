@@ -1,18 +1,10 @@
 #!/bin/bash
-all_cancelled_order () {
-    echo "All Orders which is in cancelled " 
+auditrec_display () {
+    echo "display_id : <<'$1'>>  Info "
     echo "<br>"
-    if [ "$1" -eq "1" ]; then
-      echo '<pre>'
-       sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript order_node search_by "[[{'status', 'equal','cancelled'}], 'key']."
-       echo '</pre>'
-    elif [ "$1" -eq "2" ]; then
-       echo '<pre>'
-       sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript order_node search_by "[[{'status', 'equal', 'cancelled'}], 'record']."
-       echo '</pre>'
-    else 
-        echo "Wrong Key pressed"
-    fi
+    echo '<pre>'
+    sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript station_recovery audit_summary "[{'display_id',$1}]."      
+    echo '</pre>'
 }
 echo "Content-type: text/html"
 echo ""
@@ -20,7 +12,7 @@ echo ""
 echo '<html>'
 echo '<head>'
 echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">'
-echo '<title>All Cancelled Order</title>'
+echo '<title>Auditrec by Display_id</title>'
 echo '</head>'
 echo '<body style="background-color:#B8B8B8">'
 
@@ -34,7 +26,7 @@ echo "<br>"
 
   echo "<form method=GET action=\"${SCRIPT}\">"\
        '<table nowrap>'\
-          '<tr><td>Type 1 for key and 2 for record</TD><TD><input type="number" name="Type 1 for key and 2 for record" size=12></td></tr>'\
+          '<tr><td>Display_id</TD><TD><input type="text" name="Display_id" size=12></td></tr>'\
 		  '</tr></table>'
 
   echo '<br><input type="submit" value="SUBMIT">'\
@@ -56,11 +48,11 @@ echo "<br>"
         exit 0
   else
    # No looping this time, just extract the data you are looking for with sed:
-     XX=`echo "$QUERY_STRING" | sed -n 's/^.*record=\([^ ]*\).*$/\1/p'`
+     XX=`echo "$QUERY_STRING" | sed -n 's/^.*Display_id=\([^&]*\).*$/\1/p' | sed "s/%20/ /g"`
 	
-     echo "Type 1 for key and 2 for record: " $XX
-     echo '<br>'
-     all_cancelled_order $XX  
+     echo "Display Id: " $XX
+     echo '<br>'      
+     auditrec_display $XX
   fi
 echo '</body>'
 echo '</html>'

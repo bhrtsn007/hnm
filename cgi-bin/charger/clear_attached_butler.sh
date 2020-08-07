@@ -1,18 +1,9 @@
 #!/bin/bash
-audit_task_rackpicked () {
-    echo "All Audit task in pending rackpicked on PPS : $1"
+clear_attached_butler () {
+    echo "Clearing attached Butler from Charger_ID: $1"
     echo "<br>"
-    if [ "$2" -eq "1" ]; then
-      echo '<pre>'
-       sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript audittaskrec search_by "[[{'pps_id', 'equal',$1},{'status', 'equal', {'pending','rack_picked'}}], 'key']."
-       echo '</pre>'
-    elif [ "$2" -eq "2" ]; then
-      echo '<pre>'
-       sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript audittaskrec search_by "[[{'pps_id', 'equal',$1},{'status', 'equal', {'pending','rack_picked'}}], 'record']."
-       echo '</pre>'
-    else 
-        echo "Wrong Key pressed"
-    fi
+    sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript chargerinfo update_columns_by_id "[$1,[{'attached_butler_id','undefined'}]]."
+
 }
 echo "Content-type: text/html"
 echo ""
@@ -20,7 +11,7 @@ echo ""
 echo '<html>'
 echo '<head>'
 echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">'
-echo '<title>Specific audit Task on PPS for status rack_picked</title>'
+echo '<title>Clear attached butler</title>'
 echo '</head>'
 echo '<body style="background-color:#B8B8B8">'
 
@@ -34,8 +25,7 @@ echo "<br>"
 
   echo "<form method=GET action=\"${SCRIPT}\">"\
        '<table nowrap>'\
-          '<tr><td>PPS_ID</TD><TD><input type="number" name="PPS_ID" size=12></td></tr>'\
-		  '<tr><td>Type 1 for key and 2 for record</TD><TD><input type="number" name="Type 1 for key and 2 for record" size=12></td></tr>'\
+          '<tr><td>CHARGER_ID</TD><TD><input type="number" name="ORDER_ID" size=12></td></tr>'\
 		  '</tr></table>'
 
   echo '<br><input type="submit" value="SUBMIT">'\
@@ -58,13 +48,10 @@ echo "<br>"
   else
    # No looping this time, just extract the data you are looking for with sed:
      XX=`echo "$QUERY_STRING" | sed -r 's/([^0-9]*([0-9]*)){1}.*/\2/'`
-	 YY=`echo "$QUERY_STRING" | sed -n 's/^.*record=\([^ ]*\).*$/\1/p'`
 	
-     echo "PPS_ID: " $XX
+     echo "Charger_ID: " $XX
      echo '<br>'
-	   echo "Type 1 for key and 2 for record: " $YY
-     echo '<br>'
-    audit_task_rackpicked $XX $YY 
+     clear_attached_butler $XX   
   fi
 echo '</body>'
 echo '</html>'

@@ -1,18 +1,10 @@
 #!/bin/bash
-pps_seat_pps () {
-    echo "PPS Seat data for PPS_ID : $1"
+pick_task_pps_order () {
+    echo "All Pick Task Associated on that PPS : $1"
     echo "<br>"
-    if [ "$2" -eq "1" ]; then
-      echo '<pre>'
-       sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript pps_seat search_by "[[{'pps_id', 'equal', $1}], 'key']."
-       echo '</pre>'
-    elif [ "$2" -eq "2" ]; then
-      echo '<pre>'
-       sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript pps_seat search_by "[[{'pps_id', 'equal', $1}], 'record']."
-       echo '</pre>'
-    else 
-        echo "Wrong Key pressed"
-    fi
+    echo '<pre>'
+    sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript ppstaskrec get_pick_tasks_by_pps [$1].
+    echo '</pre>'
 }
 echo "Content-type: text/html"
 echo ""
@@ -20,7 +12,7 @@ echo ""
 echo '<html>'
 echo '<head>'
 echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">'
-echo '<title>PPS Seat By ID</title>'
+echo '<title>All pending pps task on PPS</title>'
 echo '</head>'
 echo '<body style="background-color:#B8B8B8">'
 
@@ -35,7 +27,6 @@ echo "<br>"
   echo "<form method=GET action=\"${SCRIPT}\">"\
        '<table nowrap>'\
           '<tr><td>PPS_ID</TD><TD><input type="number" name="PPS_ID" size=12></td></tr>'\
-		  '<tr><td>Type 1 for key 2 for record</TD><TD><input type="number" name="Type 1 for key 2 for record" size=12></td></tr>'\
 		  '</tr></table>'
 
   echo '<br><input type="submit" value="SUBMIT">'\
@@ -58,13 +49,11 @@ echo "<br>"
   else
    # No looping this time, just extract the data you are looking for with sed:
      XX=`echo "$QUERY_STRING" | sed -r 's/([^0-9]*([0-9]*)){1}.*/\2/'`
-	 YY=`echo "$QUERY_STRING" | sed -r 's/([^0-9]*([0-9]*)){4}.*/\2/'`
+	 YY=`echo "$QUERY_STRING" | sed -n 's/^.*record=\([^ ]*\).*$/\1/p'`
 	
      echo "PPS_ID: " $XX
      echo '<br>'
-	   echo "Type 1 for key 2 for record: " $YY
-     echo '<br>'
-     pps_seat_pps $XX $YY
+     pick_task_pps_order $XX 
   fi
 echo '</body>'
 echo '</html>'

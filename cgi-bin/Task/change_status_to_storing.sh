@@ -1,12 +1,14 @@
 #!/bin/bash
-sku_information () {
-    product_uid=`sshpass -p 'apj0702' ssh -o StrictHostKeyChecking=no -t gor@172.19.40.59 "/home/gor/easy_console/get_item_uid.sh $1" | head -3 | tail -1 | grep -o '[[:digit:]]*'`
+change_status_to_storing () {
+    echo "Change Taskkey : <<'$1'>> to storing"
     echo "<br>"
-    echo "Internal Id for SKU is:" $product_uid
-    echo "<br>"
-    echo '<pre>'
-    sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript inventory search_by "[[{'item_uid', 'equal', <<\"$product_uid\">>}], 'record']."
-    echo '</pre>'
+    if [ "$2" -eq "1" ]; then
+        sudo /opt/butler_server/erts-9.3.3.8/bin/escript /home/gor/rpc_call.escript butler_task_functions set_task_status "[{'picktask',<<\"$1\">>},{'pending','storing'},'undefined']."
+    elif [ "$2" -eq "2" ]; then
+        sudo /opt/butler_server/erts-9.3.3.8/bin/escript /home/gor/rpc_call.escript butler_task_functions set_task_status "[{'audittask',<<\"$1\">>},{'pending','storing'},'undefined']."
+    else
+        echo "Wrong key pressed"
+    fi        
 }
 echo "Content-type: text/html"
 echo ""
@@ -14,7 +16,7 @@ echo ""
 echo '<html>'
 echo '<head>'
 echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">'
-echo '<title>Get Inventory Detail from SKU_ID</title>'
+echo '<title>Change Task status to storing</title>'
 echo '</head>'
 echo '<body style="background-color:#B8B8B8">'
 
@@ -28,7 +30,8 @@ echo "<br>"
 
   echo "<form method=GET action=\"${SCRIPT}\">"\
        '<table nowrap>'\
-          '<tr><td>SKU_ID</TD><TD><input type="number" name="SKU_ID" size=12></td></tr>'\
+          '<tr><td>Task_key</TD><TD><input type="text" name="Task_key" size=12></td></tr>'\
+		  '<tr><td>Type 1 for picktask and 2 for audittask</TD><TD><input type="number" name="Type 1 for picktask and 2 for audittask" size=12></td></tr>'\
 		  '</tr></table>'
 
   echo '<br><input type="submit" value="SUBMIT">'\
@@ -50,11 +53,14 @@ echo "<br>"
         exit 0
   else
    # No looping this time, just extract the data you are looking for with sed:
-     XX=`echo "$QUERY_STRING" | sed -r 's/([^0-9]*([0-9]*)){1}.*/\2/'`
+     XX=`echo "$QUERY_STRING" | sed -n 's/^.*Task_key=\([^&]*\).*$/\1/p' | sed "s/%20/ /g"`
+   YY=`echo "$QUERY_STRING" | sed -n 's/^.*audittask=\([^ ]*\).*$/\1/p'`
 	
-     echo "SKU_ID: " $XX
+     echo "Task_key: " $XX
      echo '<br>'
-     sku_information $XX 
+	   echo "Type 1 for picktask and 2 for audittask: " $YY
+     echo '<br>'
+     change_status_to_storing $XX $YY  
   fi
 echo '</body>'
 echo '</html>'

@@ -1,9 +1,8 @@
 #!/bin/bash
-change_to_temp_unfullilable () {
-    echo "Changing Status of order_id : $1 to temporary_unfulfillable"
+pps_crash () {
+    echo "Crash report for  PPS_ID : $1"
     echo "<br>"
-    sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript order_node update_columns_by_id "[<<\"$1\">>,[{'status','temporary_unfulfillable'}]]."
-
+    sudo /opt/butler_server/bin/butler_server rpcterms station_recovery get_crash_for_pps $1.
 }
 echo "Content-type: text/html"
 echo ""
@@ -11,7 +10,7 @@ echo ""
 echo '<html>'
 echo '<head>'
 echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">'
-echo '<title>Change Order Status to Temp_unfullilable</title>'
+echo '<title>Crash report for PPS</title>'
 echo '</head>'
 echo '<body style="background-color:#B8B8B8">'
 
@@ -25,7 +24,7 @@ echo "<br>"
 
   echo "<form method=GET action=\"${SCRIPT}\">"\
        '<table nowrap>'\
-          '<tr><td>ORDER_ID</TD><TD><input type="number" name="ORDER_ID" size=12></td></tr>'\
+          '<tr><td>PPS_ID</TD><TD><input type="number" name="PPS_ID" size=12></td></tr>'\
 		  '</tr></table>'
 
   echo '<br><input type="submit" value="SUBMIT">'\
@@ -49,9 +48,9 @@ echo "<br>"
    # No looping this time, just extract the data you are looking for with sed:
      XX=`echo "$QUERY_STRING" | sed -r 's/([^0-9]*([0-9]*)){1}.*/\2/'`
 	
-     echo "ORDER_ID: " $XX
+     echo "PPS_ID: " $XX
      echo '<br>'
-     change_to_temp_unfullilable $XX
+     pps_crash $XX
   fi
 echo '</body>'
 echo '</html>'

@@ -1,11 +1,9 @@
 #!/bin/bash
-sku_information () {
-    product_uid=`sshpass -p 'apj0702' ssh -o StrictHostKeyChecking=no -t gor@172.19.40.59 "/home/gor/easy_console/get_item_uid.sh $1" | head -3 | tail -1 | grep -o '[[:digit:]]*'`
-    echo "<br>"
-    echo "Internal Id for SKU is:" $product_uid
+dock_station_info () {
+    echo "Dock station info for PPS_ID : $1"
     echo "<br>"
     echo '<pre>'
-    sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript inventory search_by "[[{'item_uid', 'equal', <<\"$product_uid\">>}], 'record']."
+    sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript dock_station_info search_by "[[{'pps_id', 'equal', $1}], 'record']."
     echo '</pre>'
 }
 echo "Content-type: text/html"
@@ -14,7 +12,7 @@ echo ""
 echo '<html>'
 echo '<head>'
 echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">'
-echo '<title>Get Inventory Detail from SKU_ID</title>'
+echo '<title>PPS INFO BY ID</title>'
 echo '</head>'
 echo '<body style="background-color:#B8B8B8">'
 
@@ -28,7 +26,7 @@ echo "<br>"
 
   echo "<form method=GET action=\"${SCRIPT}\">"\
        '<table nowrap>'\
-          '<tr><td>SKU_ID</TD><TD><input type="number" name="SKU_ID" size=12></td></tr>'\
+          '<tr><td>PPS_ID</TD><TD><input type="number" name="PPS_ID" size=12></td></tr>'\
 		  '</tr></table>'
 
   echo '<br><input type="submit" value="SUBMIT">'\
@@ -52,9 +50,10 @@ echo "<br>"
    # No looping this time, just extract the data you are looking for with sed:
      XX=`echo "$QUERY_STRING" | sed -r 's/([^0-9]*([0-9]*)){1}.*/\2/'`
 	
-     echo "SKU_ID: " $XX
+     echo "PPS_ID: " $XX
      echo '<br>'
-     sku_information $XX 
+     dock_station_info $XX    
+     
   fi
 echo '</body>'
 echo '</html>'

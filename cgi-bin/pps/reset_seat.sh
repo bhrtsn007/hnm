@@ -1,18 +1,9 @@
 #!/bin/bash
-pps_task_started_system () {   
-    echo "All Pick/Put task pending in started in the system"
-    echo "<br>"
-    if [ "$1" -eq "1" ]; then
-      echo '<pre>'
-       sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript ppstaskrec search_by "[[{'status', 'equal', {'pending','started'}}], 'key']."
-       echo '</pre>'
-    elif [ "$1" -eq "2" ]; then
-      echo '<pre>'
-       sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript ppstaskrec search_by "[[{'status', 'equal', {'pending','started'}}], 'record']."
-       echo '</pre>'
-    else 
-        echo "Wrong Key pressed"
-    fi
+reset_seat () {
+    echo "Clearing pps seat for: " $1
+    echo '<pre>'
+    sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript station_recovery reset_seat "[$1]."
+    echo '</pre>'
 }
 echo "Content-type: text/html"
 echo ""
@@ -20,7 +11,7 @@ echo ""
 echo '<html>'
 echo '<head>'
 echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">'
-echo '<title>All PPS Task for status started in system</title>'
+echo '<title>Reset Seat</title>'
 echo '</head>'
 echo '<body style="background-color:#B8B8B8">'
 
@@ -31,11 +22,12 @@ echo "<br>"
 echo "<br>"
 echo "<br>"
 echo "<br>"
-
+echo "Type Seat name ex:- front_5 for clearing pps 5 front seat"
+echo "<br>"
   echo "<form method=GET action=\"${SCRIPT}\">"\
        '<table nowrap>'\
-          '<tr><td>Type 1 for key and 2 for record</TD><TD><input type="number" name="Type 1 for key and 2 for record" size=12></td></tr>'\
-		  '</tr></table>'
+          '<tr><td>pps_seat_name</TD><TD><input type="text" name="pps_seat_name" size=12></td></tr>'\
+           '</tr></table>'
 
   echo '<br><input type="submit" value="SUBMIT">'\
        '<input type="reset" value="Reset"></form>'
@@ -55,12 +47,14 @@ echo "<br>"
   if [ -z "$QUERY_STRING" ]; then
         exit 0
   else
-   # No looping this time, just extract the data you are looking for with sed:
-     XX=`echo "$QUERY_STRING" | sed -n 's/^.*record=\([^ ]*\).*$/\1/p'`
-	
-	   echo "Type 1 for key and 2 for record: " $XX
+     # No looping this time, just extract the data you are looking for with sed:
+
+     XX=`echo "$QUERY_STRING" | sed -n 's/^.*pps_seat_name=\([^&]*\).*$/\1/p' | sed "s/%20/ /g"`
+     
+  
+     echo "PPS Seat: " $XX
      echo '<br>'
-     pps_task_started_system $XX
+     reset_seat $XX 
   fi
 echo '</body>'
 echo '</html>'
